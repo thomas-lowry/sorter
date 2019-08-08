@@ -40,8 +40,8 @@ function sortAlpha(nodeData, direction) {
 
 //reverse the stack order of selection
 function sortReverse(nodeData) {
-	let reversedData = nodeData.slice().reverse();
-	return reversedData;
+	nodeData = nodeData.reverse();
+	return nodeData;
 }
 
 

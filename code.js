@@ -36,8 +36,8 @@ function sortAlpha(nodeData, direction) {
 }
 //reverse the stack order of selection
 function sortReverse(nodeData) {
-    var reversedData = nodeData.slice().reverse();
-    return reversedData;
+    nodeData = nodeData.reverse();
+    return nodeData;
 }
 //randomize the stack order
 function sortRandom(nodeData) {
