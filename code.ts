@@ -1,4 +1,4 @@
-figma.showUI(__html__, {width: 248, height: 176 });
+figma.showUI(__html__, {width: 240, height: 176 });
 
 //
 // Ordering functions
@@ -40,8 +40,8 @@ function sortAlpha(nodeData, direction) {
 
 //reverse the stack order of selection
 function sortReverse(nodeData) {
-
-	return nodeData.map((item,idx) => nodeData[nodeData.length-1-idx])
+	let reversedData = nodeData.slice().reverse();
+	return reversedData;
 }
 
 
@@ -71,16 +71,10 @@ function organizeNodesByParent(nodes) {
 		acc[item.parent.id].push(item);
 		return acc;
 	}, {});
-
+	console.log(groupedNodes);
 	return groupedNodes;
 }
 
-//insert nodes
-function insertNodes(parent, nodes) {
-	for (let i = 0; i < nodes.length; i++) {
-		parent.insertChild(i, nodes[i]);
-	}
-}
 
 
 figma.ui.onmessage = msg => {
@@ -88,8 +82,8 @@ figma.ui.onmessage = msg => {
 	let selection = Array.from(figma.currentPage.selection);
 	let sortOrder = msg.order;
 
-	if (selection.length == 0) {
-		alert('Please make a selection.')
+	if (selection.length <= 1) {
+		alert('Please select at least 2 layers');
 	}
 
 	let organizedNodes = organizeNodesByParent(selection);
@@ -101,8 +95,6 @@ figma.ui.onmessage = msg => {
 
 		let orderedNodes = [];
 		let parent = organizedNodes[item][0].parent;
-	
-		console.log(groupedNodes);
 
 		if (sortOrder == 'sortPosition') {
 			orderedNodes = sortPosition(groupedNodes);
@@ -116,9 +108,9 @@ figma.ui.onmessage = msg => {
 			orderedNodes = sortRandom(groupedNodes);
 		}
 
-		console.log(orderedNodes);
-
-		insertNodes(parent, orderedNodes);
+		orderedNodes.forEach(node => {
+			parent.appendChild(node);
+		});
 
 	});
 

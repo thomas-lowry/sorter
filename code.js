@@ -1,4 +1,4 @@
-figma.showUI(__html__, { width: 248, height: 176 });
+figma.showUI(__html__, { width: 240, height: 176 });
 //
 // Ordering functions
 //
@@ -36,7 +36,8 @@ function sortAlpha(nodeData, direction) {
 }
 //reverse the stack order of selection
 function sortReverse(nodeData) {
-    return nodeData.map(function (item, idx) { return nodeData[nodeData.length - 1 - idx]; });
+    var reversedData = nodeData.slice().reverse();
+    return reversedData;
 }
 //randomize the stack order
 function sortRandom(nodeData) {
@@ -59,19 +60,14 @@ function organizeNodesByParent(nodes) {
         acc[item.parent.id].push(item);
         return acc;
     }, {});
+    console.log(groupedNodes);
     return groupedNodes;
-}
-//insert nodes
-function insertNodes(parent, nodes) {
-    for (var i = 0; i < nodes.length; i++) {
-        parent.insertChild(i, nodes[i]);
-    }
 }
 figma.ui.onmessage = function (msg) {
     var selection = Array.from(figma.currentPage.selection);
     var sortOrder = msg.order;
-    if (selection.length == 0) {
-        alert('Please make a selection.');
+    if (selection.length <= 1) {
+        alert('Please select at least 2 layers');
     }
     var organizedNodes = organizeNodesByParent(selection);
     Object.keys(organizedNodes).forEach(function (group) {
@@ -79,7 +75,6 @@ figma.ui.onmessage = function (msg) {
         var groupedNodes = organizedNodes[item];
         var orderedNodes = [];
         var parent = organizedNodes[item][0].parent;
-        console.log(groupedNodes);
         if (sortOrder == 'sortPosition') {
             orderedNodes = sortPosition(groupedNodes);
         }
@@ -95,7 +90,8 @@ figma.ui.onmessage = function (msg) {
         else {
             orderedNodes = sortRandom(groupedNodes);
         }
-        console.log(orderedNodes);
-        insertNodes(parent, orderedNodes);
+        orderedNodes.forEach(function (node) {
+            parent.appendChild(node);
+        });
     });
 };
