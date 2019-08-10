@@ -1,7 +1,7 @@
 # Sorter
 A small utility plugin to help you sort/re-order layers in Figma
 
-![Sorter promo image](img/banner.jpg?raw=true "Sort promo")
+![Sorter promo image](img/banner.png?raw=true "Sort promo")
 
 
 ### How to use
