@@ -104,23 +104,29 @@ figma.ui.onmessage = msg => {
 
 		selection.forEach(parentNode => {
 
-			let children = Array.from(parentNode.children);
+			let parent = parentNode;
+			let childNodes = parent.children;
 
-			if (children.length != 0) {
+			if (childNodes != undefined) {
 
-				let parent = parentNode;
+				if (childNodes.length <= 1) {
+					alert('Parent must contain at least 2 children.');
+					return;
+				}
+
 				let orderedNodes = [];
+				childNodes = Array.from(childNodes);
 
 				if (sortOrder == 'sortPosition') {
-					orderedNodes = sortPosition(children);
+					orderedNodes = sortPosition(childNodes);
 				} else if (sortOrder == 'sortAlphaAsc') {
-					orderedNodes = sortAlpha(children, 'asc');
+					orderedNodes = sortAlpha(childNodes, 'asc');
 				} else if (sortOrder == 'sortAlphaDesc') {
-					orderedNodes = sortAlpha(children, 'desc');
+					orderedNodes = sortAlpha(childNodes, 'desc');
 				} else if (sortOrder == 'sortReverse') {
-					orderedNodes = sortChildrenReverse(children);
+					orderedNodes = sortChildrenReverse(childNodes);
 				} else { 
-					orderedNodes = sortRandom(children);
+					orderedNodes = sortRandom(childNodes);
 				}
 
 				orderedNodes.forEach(node => {
@@ -133,6 +139,7 @@ figma.ui.onmessage = msg => {
 
 		if (selection.length <= 1) {
 			alert('Please select at least 2 layers');
+			return;
 		}
 	
 		let organizedNodes = organizeNodesByParent(selection);
