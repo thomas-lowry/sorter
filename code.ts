@@ -1,4 +1,4 @@
-figma.showUI(__html__, {width: 240, height: 176 });
+figma.showUI(__html__, {width: 240, height: 224 });
 
 //
 // Ordering functions
@@ -40,8 +40,14 @@ function sortAlpha(nodeData, direction) {
 
 //reverse the stack order of selection
 function sortReverse(nodeData) {
-	nodeData = nodeData.reverse();
-	return nodeData;
+	let parentNode = nodeData[0].parent;
+	let children = parentNode.children;
+	children = children.filter(function(entry1) {
+		return nodeData.some(function(entry2) { return entry1.id === entry2.id; });
+	});
+	children.reverse();
+
+	return children;
 }
 
 
@@ -61,17 +67,11 @@ function sortRandom(nodeData) {
 //
 // Helper functions
 //
-
-//organize nodes into arrays based on common parent
 function organizeNodesByParent(nodes) {
-	let groupedNodes = nodes.reduce((acc, item) => {
-		if (!acc[item.parent.id]) {
-			acc[item.parent.id] = [];
-		}
-		acc[item.parent.id].push(item);
-		return acc;
-	}, {});
-	console.log(groupedNodes);
+	let groupedNodes = nodes.reduce((r, a) => {
+		r[a.parent.id] = [...r[a.parent.id] || [], a];
+		return r;
+		}, {});
 	return groupedNodes;
 }
 
@@ -88,30 +88,31 @@ figma.ui.onmessage = msg => {
 
 	let organizedNodes = organizeNodesByParent(selection);
 
-	Object.keys(organizedNodes).forEach((group) => {
+	Object.entries(organizedNodes).forEach(entries => {
 
-		let item = group.toString();
-		let groupedNodes = organizedNodes[item];
+		entries.forEach(entry => {
+			if (Array.isArray(entry)) {
 
-		let orderedNodes = [];
-		let parent = organizedNodes[item][0].parent;
+				let orderedNodes = [];
+				let parent = entry[0].parent;
 
-		if (sortOrder == 'sortPosition') {
-			orderedNodes = sortPosition(groupedNodes);
-		} else if (sortOrder == 'sortAlphaAsc') {
-			orderedNodes = sortAlpha(groupedNodes, 'asc');
-		} else if (sortOrder == 'sortAlphaDesc') {
-			orderedNodes = sortAlpha(groupedNodes, 'desc');
-		} else if (sortOrder == 'sortReverse') {
-			orderedNodes = sortReverse(groupedNodes);
-		} else { 
-			orderedNodes = sortRandom(groupedNodes);
-		}
+				if (sortOrder == 'sortPosition') {
+					orderedNodes = sortPosition(entry);
+				} else if (sortOrder == 'sortAlphaAsc') {
+					orderedNodes = sortAlpha(entry, 'asc');
+				} else if (sortOrder == 'sortAlphaDesc') {
+					orderedNodes = sortAlpha(entry, 'desc');
+				} else if (sortOrder == 'sortReverse') {
+					orderedNodes = sortReverse(entry);
+				} else { 
+					orderedNodes = sortRandom(entry);
+				}
 
-		orderedNodes.forEach(node => {
-			parent.appendChild(node);
-		});
+				orderedNodes.forEach(node => {
+					parent.appendChild(node);
+				});
 
+			}
+		})
 	});
-
 };

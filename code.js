@@ -1,4 +1,4 @@
-figma.showUI(__html__, { width: 240, height: 176 });
+figma.showUI(__html__, { width: 240, height: 224 });
 //
 // Ordering functions
 //
@@ -36,8 +36,13 @@ function sortAlpha(nodeData, direction) {
 }
 //reverse the stack order of selection
 function sortReverse(nodeData) {
-    nodeData = nodeData.reverse();
-    return nodeData;
+    var parentNode = nodeData[0].parent;
+    var children = parentNode.children;
+    children = children.filter(function (entry1) {
+        return nodeData.some(function (entry2) { return entry1.id === entry2.id; });
+    });
+    children.reverse();
+    return children;
 }
 //randomize the stack order
 function sortRandom(nodeData) {
@@ -51,16 +56,11 @@ function sortRandom(nodeData) {
 //
 // Helper functions
 //
-//organize nodes into arrays based on common parent
 function organizeNodesByParent(nodes) {
-    var groupedNodes = nodes.reduce(function (acc, item) {
-        if (!acc[item.parent.id]) {
-            acc[item.parent.id] = [];
-        }
-        acc[item.parent.id].push(item);
-        return acc;
+    var groupedNodes = nodes.reduce(function (r, a) {
+        r[a.parent.id] = (r[a.parent.id] || []).concat([a]);
+        return r;
     }, {});
-    console.log(groupedNodes);
     return groupedNodes;
 }
 figma.ui.onmessage = function (msg) {
@@ -70,28 +70,30 @@ figma.ui.onmessage = function (msg) {
         alert('Please select at least 2 layers');
     }
     var organizedNodes = organizeNodesByParent(selection);
-    Object.keys(organizedNodes).forEach(function (group) {
-        var item = group.toString();
-        var groupedNodes = organizedNodes[item];
-        var orderedNodes = [];
-        var parent = organizedNodes[item][0].parent;
-        if (sortOrder == 'sortPosition') {
-            orderedNodes = sortPosition(groupedNodes);
-        }
-        else if (sortOrder == 'sortAlphaAsc') {
-            orderedNodes = sortAlpha(groupedNodes, 'asc');
-        }
-        else if (sortOrder == 'sortAlphaDesc') {
-            orderedNodes = sortAlpha(groupedNodes, 'desc');
-        }
-        else if (sortOrder == 'sortReverse') {
-            orderedNodes = sortReverse(groupedNodes);
-        }
-        else {
-            orderedNodes = sortRandom(groupedNodes);
-        }
-        orderedNodes.forEach(function (node) {
-            parent.appendChild(node);
+    Object.entries(organizedNodes).forEach(function (entries) {
+        entries.forEach(function (entry) {
+            if (Array.isArray(entry)) {
+                var orderedNodes = [];
+                var parent_1 = entry[0].parent;
+                if (sortOrder == 'sortPosition') {
+                    orderedNodes = sortPosition(entry);
+                }
+                else if (sortOrder == 'sortAlphaAsc') {
+                    orderedNodes = sortAlpha(entry, 'asc');
+                }
+                else if (sortOrder == 'sortAlphaDesc') {
+                    orderedNodes = sortAlpha(entry, 'desc');
+                }
+                else if (sortOrder == 'sortReverse') {
+                    orderedNodes = sortReverse(entry);
+                }
+                else {
+                    orderedNodes = sortRandom(entry);
+                }
+                orderedNodes.forEach(function (node) {
+                    parent_1.appendChild(node);
+                });
+            }
         });
     });
 };
