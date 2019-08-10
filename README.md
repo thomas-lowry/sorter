@@ -14,7 +14,8 @@ If you only want to sort children of your selection, enable the "Sort Children O
 This will sort your selection using top, left → bottom, right ordering. In other words, your top left most element on the canvas will be at the top of the layer stack and your bottom right most element at the very bottom.
 
 ### Alphabetical
-You can sort alphabetical based on layer names. Ascending will sort layers 0 → 9, A → Z. Descending will sort layers Z → A, 9 → 0.
+You can sort alphabetical based on layer names.
+Ascending will sort layers 0 → 9, A → Z. Descending will sort layers Z → A, 9 → 0.
 
 ### Reverse
 This will reverse the order of your current layer selection
