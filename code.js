@@ -1,4 +1,11 @@
-figma.showUI(__html__, { width: 240, height: 224 });
+figma.showUI(__html__, { width: 240, height: 228 });
+//get plugin data to remember last settings for subsequent plugin runs
+var sortChildrenSetting = figma.root.getPluginData('sortChildrenOnly');
+if (sortChildrenSetting) {
+    figma.ui.postMessage({
+        'sortChildrenOnly': sortChildrenSetting
+    });
+}
 //
 // Ordering functions
 //
@@ -44,6 +51,10 @@ function sortReverse(nodeData) {
     children.reverse();
     return children;
 }
+function sortChildrenReverse(nodeData) {
+    nodeData = nodeData.reverse();
+    return nodeData;
+}
 //randomize the stack order
 function sortRandom(nodeData) {
     var _a;
@@ -65,35 +76,68 @@ function organizeNodesByParent(nodes) {
 }
 figma.ui.onmessage = function (msg) {
     var selection = Array.from(figma.currentPage.selection);
+    //get values from UI
     var sortOrder = msg.order;
-    if (selection.length <= 1) {
-        alert('Please select at least 2 layers');
-    }
-    var organizedNodes = organizeNodesByParent(selection);
-    Object.entries(organizedNodes).forEach(function (entries) {
-        entries.forEach(function (entry) {
-            if (Array.isArray(entry)) {
+    var children = msg.children;
+    //set plugin data
+    figma.root.setPluginData('sortChildrenOnly', children.toString());
+    if (children === true) {
+        selection.forEach(function (parentNode) {
+            var children = Array.from(parentNode.children);
+            if (children.length != 0) {
+                var parent_1 = parentNode;
                 var orderedNodes = [];
-                var parent_1 = entry[0].parent;
                 if (sortOrder == 'sortPosition') {
-                    orderedNodes = sortPosition(entry);
+                    orderedNodes = sortPosition(children);
                 }
                 else if (sortOrder == 'sortAlphaAsc') {
-                    orderedNodes = sortAlpha(entry, 'asc');
+                    orderedNodes = sortAlpha(children, 'asc');
                 }
                 else if (sortOrder == 'sortAlphaDesc') {
-                    orderedNodes = sortAlpha(entry, 'desc');
+                    orderedNodes = sortAlpha(children, 'desc');
                 }
                 else if (sortOrder == 'sortReverse') {
-                    orderedNodes = sortReverse(entry);
+                    orderedNodes = sortChildrenReverse(children);
                 }
                 else {
-                    orderedNodes = sortRandom(entry);
+                    orderedNodes = sortRandom(children);
                 }
                 orderedNodes.forEach(function (node) {
                     parent_1.appendChild(node);
                 });
             }
         });
-    });
+    }
+    else {
+        if (selection.length <= 1) {
+            alert('Please select at least 2 layers');
+        }
+        var organizedNodes = organizeNodesByParent(selection);
+        Object.entries(organizedNodes).forEach(function (entries) {
+            entries.forEach(function (entry) {
+                if (Array.isArray(entry)) {
+                    var orderedNodes = [];
+                    var parent_2 = entry[0].parent;
+                    if (sortOrder == 'sortPosition') {
+                        orderedNodes = sortPosition(entry);
+                    }
+                    else if (sortOrder == 'sortAlphaAsc') {
+                        orderedNodes = sortAlpha(entry, 'asc');
+                    }
+                    else if (sortOrder == 'sortAlphaDesc') {
+                        orderedNodes = sortAlpha(entry, 'desc');
+                    }
+                    else if (sortOrder == 'sortReverse') {
+                        orderedNodes = sortReverse(entry);
+                    }
+                    else {
+                        orderedNodes = sortRandom(entry);
+                    }
+                    orderedNodes.forEach(function (node) {
+                        parent_2.appendChild(node);
+                    });
+                }
+            });
+        });
+    }
 };

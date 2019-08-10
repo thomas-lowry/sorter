@@ -1,4 +1,13 @@
-figma.showUI(__html__, {width: 240, height: 224 });
+figma.showUI(__html__, {width: 240, height: 228 });
+
+//get plugin data to remember last settings for subsequent plugin runs
+var sortChildrenSetting = figma.root.getPluginData('sortChildrenOnly');
+
+if (sortChildrenSetting) {
+	figma.ui.postMessage({
+		'sortChildrenOnly': sortChildrenSetting
+	});
+}
 
 //
 // Ordering functions
@@ -49,6 +58,10 @@ function sortReverse(nodeData) {
 
 	return children;
 }
+function sortChildrenReverse(nodeData) {
+	nodeData = nodeData.reverse();
+	return nodeData;
+}
 
 
 //randomize the stack order
@@ -59,7 +72,6 @@ function sortRandom(nodeData) {
 	}
 	return nodeData;
 }
-
 
 
 
@@ -80,39 +92,76 @@ function organizeNodesByParent(nodes) {
 figma.ui.onmessage = msg => {
 
 	let selection = Array.from(figma.currentPage.selection);
+	
+	//get values from UI
 	let sortOrder = msg.order;
+	let children = msg.children;
 
-	if (selection.length <= 1) {
-		alert('Please select at least 2 layers');
-	}
+	//set plugin data
+	figma.root.setPluginData('sortChildrenOnly', children.toString());
 
-	let organizedNodes = organizeNodesByParent(selection);
+	if (children === true) {
 
-	Object.entries(organizedNodes).forEach(entries => {
+		selection.forEach(parentNode => {
 
-		entries.forEach(entry => {
-			if (Array.isArray(entry)) {
+			let children = Array.from(parentNode.children);
 
+			if (children.length != 0) {
+
+				let parent = parentNode;
 				let orderedNodes = [];
-				let parent = entry[0].parent;
 
 				if (sortOrder == 'sortPosition') {
-					orderedNodes = sortPosition(entry);
+					orderedNodes = sortPosition(children);
 				} else if (sortOrder == 'sortAlphaAsc') {
-					orderedNodes = sortAlpha(entry, 'asc');
+					orderedNodes = sortAlpha(children, 'asc');
 				} else if (sortOrder == 'sortAlphaDesc') {
-					orderedNodes = sortAlpha(entry, 'desc');
+					orderedNodes = sortAlpha(children, 'desc');
 				} else if (sortOrder == 'sortReverse') {
-					orderedNodes = sortReverse(entry);
+					orderedNodes = sortChildrenReverse(children);
 				} else { 
-					orderedNodes = sortRandom(entry);
+					orderedNodes = sortRandom(children);
 				}
 
 				orderedNodes.forEach(node => {
 					parent.appendChild(node);
 				});
-
 			}
-		})
-	});
+		});
+
+	} else {
+
+		if (selection.length <= 1) {
+			alert('Please select at least 2 layers');
+		}
+	
+		let organizedNodes = organizeNodesByParent(selection);
+	
+		Object.entries(organizedNodes).forEach(entries => {
+	
+			entries.forEach(entry => {
+				if (Array.isArray(entry)) {
+	
+					let orderedNodes = [];
+					let parent = entry[0].parent;
+	
+					if (sortOrder == 'sortPosition') {
+						orderedNodes = sortPosition(entry);
+					} else if (sortOrder == 'sortAlphaAsc') {
+						orderedNodes = sortAlpha(entry, 'asc');
+					} else if (sortOrder == 'sortAlphaDesc') {
+						orderedNodes = sortAlpha(entry, 'desc');
+					} else if (sortOrder == 'sortReverse') {
+						orderedNodes = sortReverse(entry);
+					} else { 
+						orderedNodes = sortRandom(entry);
+					}
+	
+					orderedNodes.forEach(node => {
+						parent.appendChild(node);
+					});
+				}
+			})
+		});
+	}
 };
