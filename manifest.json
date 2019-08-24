@@ -1,7 +1,7 @@
 {
   "name": "Sorter",
   "id": "742038190980789811",
-  "api": "0.6.0",
+  "api": "1.0.0",
   "main": "code.js",
   "ui": "ui.html"
 }

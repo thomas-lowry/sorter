@@ -155,7 +155,7 @@ figma.ui.onmessage = msg => {
 			if (childNodes != undefined) {
 
 				if (childNodes.length <= 1) {
-					alert('Parent must contain at least 2 children.');
+					figma.notify('Parent must contain at least 2 children');
 					return;
 				}
 
@@ -184,7 +184,7 @@ figma.ui.onmessage = msg => {
 	} else {
 
 		if (selection.length <= 1) {
-			alert('Please select at least 2 layers');
+			figma.notify('Please select at least 2 layers');
 			return;
 		}
 	
