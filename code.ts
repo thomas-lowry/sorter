@@ -79,12 +79,57 @@ function sortRandom(nodeData) {
 //
 // Helper functions
 //
+
+// This function takes the selection, and builds a new array of arrays that are grouped by nodes that share the same parent
+// This allows us to sort those layers in context of their parent, and then re-insert them into the parent node
+// This function is then used buy the sorting functions to sort each group individually by the sort order chosen by the user
 function organizeNodesByParent(nodes) {
 	let groupedNodes = nodes.reduce((r, a) => {
 		r[a.parent.id] = [...r[a.parent.id] || [], a];
 		return r;
 		}, {});
 	return groupedNodes;
+}
+
+// This function returns the number of layers from top of layer stack
+// We need this to figure out the index in which we will reinsert the sorted children back into the layer stack
+function findDistanceFromTop(nodes, children) {
+	let indexes = [];
+	let newChildren = [];
+
+	//build array of index of matches elements
+	children.forEach(child => {
+		nodes.forEach(node => {
+			if (child.id === node.id) {
+				let index = children.findIndex(x => x.id ===node.id);
+				indexes.push(index);
+			}
+		});
+	})
+
+	//sort array of indexes to find the larest
+	indexes.sort(function(node1, node2) {
+		if (node1 > node2) return 1;
+		if (node1 < node2) return -1;
+	});
+
+	let topMostIndex = indexes[indexes.length - 1];
+	let numOfLayersFromTop = (children.length - 1) - topMostIndex;
+
+	return numOfLayersFromTop;
+}
+
+// This function will remove the duplicate nodes between the selection and the matches
+// that exist in the parent node
+// we need to do this because the selection data from Figma doesnot guarantee 
+// that they will be in the same order as they arewithin the array of children
+function removeDuplicates(nodes, children) {
+	let newChildren = children.filter(function(c){
+		return !nodes.find(function(n){
+			return n.id == c.id;
+		});
+	});
+	return newChildren;
 }
 
 
@@ -116,6 +161,7 @@ figma.ui.onmessage = msg => {
 
 				let orderedNodes = [];
 				childNodes = Array.from(childNodes);
+
 
 				if (sortOrder == 'sortPosition') {
 					orderedNodes = sortPosition(childNodes);
@@ -150,7 +196,10 @@ figma.ui.onmessage = msg => {
 				if (Array.isArray(entry)) {
 	
 					let orderedNodes = [];
-					let parent = entry[0].parent;
+					let parent = entry[0].parent
+					let children = parent.children;
+					let distanceFromTop = findDistanceFromTop(entry, children);
+					let childrenWithNoDuplicates = removeDuplicates(entry, children);
 	
 					if (sortOrder == 'sortPosition') {
 						orderedNodes = sortPosition(entry);
@@ -163,10 +212,26 @@ figma.ui.onmessage = msg => {
 					} else { 
 						orderedNodes = sortRandom(entry);
 					}
-	
+
+					let newChildArr = [];
+					let indexToSpliceAt = childrenWithNoDuplicates.length - distanceFromTop;
+					let topNodes = childrenWithNoDuplicates.splice(indexToSpliceAt);
+					
+					childrenWithNoDuplicates.forEach(node => {
+						newChildArr.push(node);
+					})
+
 					orderedNodes.forEach(node => {
-						parent.appendChild(node);
-					});
+						newChildArr.push(node);
+					})
+
+					topNodes.forEach(node => {
+						newChildArr.push(node);
+					})
+
+					newChildArr.forEach(child => {
+						parent.appendChild(child);
+					})
 				}
 			})
 		});

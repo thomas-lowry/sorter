@@ -67,12 +67,52 @@ function sortRandom(nodeData) {
 //
 // Helper functions
 //
+// This function takes the selection, and builds a new array of arrays that are grouped by nodes that share the same parent
+// This allows us to sort those layers in context of their parent, and then re-insert them into the parent node
+// This function is then used buy the sorting functions to sort each group individually by the sort order chosen by the user
 function organizeNodesByParent(nodes) {
     var groupedNodes = nodes.reduce(function (r, a) {
         r[a.parent.id] = (r[a.parent.id] || []).concat([a]);
         return r;
     }, {});
     return groupedNodes;
+}
+// This function returns the number of layers from top of layer stack
+// We need this to figure out the index in which we will reinsert the sorted children back into the layer stack
+function findDistanceFromTop(nodes, children) {
+    var indexes = [];
+    var newChildren = [];
+    //build array of index of matches elements
+    children.forEach(function (child) {
+        nodes.forEach(function (node) {
+            if (child.id === node.id) {
+                var index = children.findIndex(function (x) { return x.id === node.id; });
+                indexes.push(index);
+            }
+        });
+    });
+    //sort array of indexes to find the larest
+    indexes.sort(function (node1, node2) {
+        if (node1 > node2)
+            return 1;
+        if (node1 < node2)
+            return -1;
+    });
+    var topMostIndex = indexes[indexes.length - 1];
+    var numOfLayersFromTop = (children.length - 1) - topMostIndex;
+    return numOfLayersFromTop;
+}
+// This function will remove the duplicate nodes between the selection and the matches
+// that exist in the parent node
+// we need to do this because the selection data from Figma doesnot guarantee 
+// that they will be in the same order as they arewithin the array of children
+function removeDuplicates(nodes, children) {
+    var newChildren = children.filter(function (c) {
+        return !nodes.find(function (n) {
+            return n.id == c.id;
+        });
+    });
+    return newChildren;
 }
 figma.ui.onmessage = function (msg) {
     var selection = Array.from(figma.currentPage.selection);
@@ -124,6 +164,9 @@ figma.ui.onmessage = function (msg) {
                 if (Array.isArray(entry)) {
                     var orderedNodes = [];
                     var parent_1 = entry[0].parent;
+                    var children_1 = parent_1.children;
+                    var distanceFromTop = findDistanceFromTop(entry, children_1);
+                    var childrenWithNoDuplicates = removeDuplicates(entry, children_1);
                     if (sortOrder == 'sortPosition') {
                         orderedNodes = sortPosition(entry);
                     }
@@ -139,8 +182,20 @@ figma.ui.onmessage = function (msg) {
                     else {
                         orderedNodes = sortRandom(entry);
                     }
+                    var newChildArr_1 = [];
+                    var indexToSpliceAt = childrenWithNoDuplicates.length - distanceFromTop;
+                    var topNodes = childrenWithNoDuplicates.splice(indexToSpliceAt);
+                    childrenWithNoDuplicates.forEach(function (node) {
+                        newChildArr_1.push(node);
+                    });
                     orderedNodes.forEach(function (node) {
-                        parent_1.appendChild(node);
+                        newChildArr_1.push(node);
+                    });
+                    topNodes.forEach(function (node) {
+                        newChildArr_1.push(node);
+                    });
+                    newChildArr_1.forEach(function (child) {
+                        parent_1.appendChild(child);
                     });
                 }
             });
