@@ -145,11 +145,9 @@ var sortChildren = document.getElementById('sortChildren');
 
 //reieve msgs from plugin code
 window.onmessage = async (event) => {
-
 	if (event.data.pluginMessage.sortChildrenOnly === 'true') {
 		sortChildren.checked = true;
 	}
-
 }
 
 //run plugin
