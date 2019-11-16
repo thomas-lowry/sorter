@@ -3,5 +3,16 @@
   "id": "742038190980789811",
   "api": "1.0.0",
   "main": "code.js",
-  "ui": "ui.html"
+  "ui": "ui.html",
+  "menu": [
+    {"name": "Position (L → R)", "command": "sortPositionX"},
+    {"name": "Position (T → B)", "command": "sortPositionY"},
+    {"name": "Position (T,L → B,R)", "command": "sortPosition"},
+    {"name": "Alphabetical Asc. (A → Z)", "command": "sortAlphaAsc"},
+    {"name": "Alphabetical Dsc. (Z → A)", "command": "sortAlphaDesc"},
+    {"name": "Reverse", "command": "sortReverse"},
+    {"name": "Random", "command": "sortRandom"},
+    {"separator": true},
+    {"name": "Advanced settings", "command": "sortUI"}
+  ]
 }
