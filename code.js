@@ -1,4 +1,4 @@
-figma.showUI(__html__, { width: 240, height: 228 });
+figma.showUI(__html__, { width: 240, height: 290 });
 //get plugin data to remember last settings for subsequent plugin runs
 var sortChildrenSetting = figma.root.getPluginData('sortChildrenOnly');
 if (sortChildrenSetting) {
@@ -9,6 +9,28 @@ if (sortChildrenSetting) {
 //
 // Ordering functions
 //
+//sort the stack order by x-axis from left to right
+function sortPositionX(nodeData) {
+    nodeData.sort(function (node1, node2) {
+        if (node1.x < node2.x)
+            return 1;
+        else
+            return -1;
+    });
+    return nodeData;
+}
+
+//sort the stack order by y-axis from top to bottom
+function sortPositionY(nodeData) {
+    nodeData.sort(function (node1, node2) {
+        if (node1.y < node2.y)
+            return 1;
+        else
+            return -1;
+    });
+    return nodeData;
+}
+
 //sort the stack order by top to bottom, left to right
 function sortPosition(nodeData) {
     nodeData.sort(function (node1, node2) {
@@ -114,91 +136,142 @@ function removeDuplicates(nodes, children) {
     });
     return newChildren;
 }
-figma.ui.onmessage = function (msg) {
+
+function sortCases(sortOrder, orderedNodes, node) {
+    switch (sortOrder) {
+        case 'sortPositionX':
+            orderedNodes = sortPositionX(node);
+            return orderedNodes;
+        case 'sortPositionY':
+            orderedNodes = sortPositionY(node);
+            return orderedNodes;
+        case 'sortPosition':
+            orderedNodes = sortPosition(node);
+            return orderedNodes;
+        case 'sortAlphaAsc':
+            orderedNodes = sortAlpha(node, 'asc');
+            return orderedNodes;
+        case 'sortAlphaDesc':
+            orderedNodes = sortAlpha(node, 'desc');
+            return orderedNodes;
+        case 'sortReverse':
+            orderedNodes = sortReverse(node);
+            return orderedNodes;
+        case 'sortRandom':
+            orderedNodes = sortRandom(node);
+            return orderedNodes;
+        default:
+            figma.notify('Ah Sh*t, Here We Go Again', { timeout: 200 });
+        
+    }
+}
+
+function sortChildrenFunction(sortOrder) {
     var selection = Array.from(figma.currentPage.selection);
-    //get values from UI
-    var sortOrder = msg.order;
-    var children = msg.children;
-    //set plugin data
-    figma.root.setPluginData('sortChildrenOnly', children.toString());
-    if (children === true) {
-        selection.forEach(function (parentNode) {
-            var parent = parentNode;
-            var childNodes = parent.children;
-            if (childNodes != undefined) {
-                if (childNodes.length <= 1) {
-                    figma.notify('Parent must contain at least 2 children');
-                    return;
-                }
+
+    selection.forEach(function (parentNode) {
+        var parent = parentNode;
+        var childNodes = parent.children;
+        if (childNodes != undefined) {
+            if (childNodes.length <= 1) {
+                figma.notify('Parent must contain at least 2 children');
+                return;
+            }
+            var orderedNodes = [];
+            childNodes = Array.from(childNodes);
+
+            orderedNodes = sortCases(sortOrder, orderedNodes, childNodes);
+
+            orderedNodes.forEach(function (node) {
+                parent.appendChild(node);
+            });
+        }
+    });
+}
+
+function sortSelectedFunction(sortOrder) {
+    var selection = Array.from(figma.currentPage.selection);
+
+    if (selection.length <= 1) {
+        figma.notify('Please select at least 2 layers');
+        return;
+    }
+    var organizedNodes = organizeNodesByParent(selection);
+    Object.entries(organizedNodes).forEach(function (entries) {
+        entries.forEach(function (entry) {
+            if (Array.isArray(entry)) {
                 var orderedNodes = [];
-                childNodes = Array.from(childNodes);
-                if (sortOrder == 'sortPosition') {
-                    orderedNodes = sortPosition(childNodes);
-                }
-                else if (sortOrder == 'sortAlphaAsc') {
-                    orderedNodes = sortAlpha(childNodes, 'asc');
-                }
-                else if (sortOrder == 'sortAlphaDesc') {
-                    orderedNodes = sortAlpha(childNodes, 'desc');
-                }
-                else if (sortOrder == 'sortReverse') {
-                    orderedNodes = sortChildrenReverse(childNodes);
-                }
-                else {
-                    orderedNodes = sortRandom(childNodes);
-                }
+                var parent_1 = entry[0].parent;
+                var children_1 = parent_1.children;
+                var distanceFromTop = findDistanceFromTop(entry, children_1);
+                var childrenWithNoDuplicates = removeDuplicates(entry, children_1);
+
+                orderedNodes = sortCases(sortOrder, orderedNodes, entry);
+
+                var newChildArr_1 = [];
+                var indexToSpliceAt = childrenWithNoDuplicates.length - distanceFromTop;
+                var topNodes = childrenWithNoDuplicates.splice(indexToSpliceAt);
+                childrenWithNoDuplicates.forEach(function (node) {
+                    newChildArr_1.push(node);
+                });
                 orderedNodes.forEach(function (node) {
-                    parent.appendChild(node);
+                    newChildArr_1.push(node);
+                });
+                topNodes.forEach(function (node) {
+                    newChildArr_1.push(node);
+                });
+                newChildArr_1.forEach(function (child) {
+                    parent_1.appendChild(child);
                 });
             }
         });
-    }
-    else {
-        if (selection.length <= 1) {
-            figma.notify('Please select at least 2 layers');
-            return;
+    });
+    figma.notify(sortOrder + " " + "finished 🎉", { timeout: 200 });
+}
+
+if (figma.command == "sortUI") {
+    figma.ui.onmessage = function (msg) {
+        //get values from UI
+        var sortOrder = msg.order;
+        var children = msg.children;
+        //set plugin data
+        figma.root.setPluginData('sortChildrenOnly', children.toString());
+        if (children === true) {
+            sortChildrenFunction(sortOrder);
         }
-        var organizedNodes = organizeNodesByParent(selection);
-        Object.entries(organizedNodes).forEach(function (entries) {
-            entries.forEach(function (entry) {
-                if (Array.isArray(entry)) {
-                    var orderedNodes = [];
-                    var parent_1 = entry[0].parent;
-                    var children_1 = parent_1.children;
-                    var distanceFromTop = findDistanceFromTop(entry, children_1);
-                    var childrenWithNoDuplicates = removeDuplicates(entry, children_1);
-                    if (sortOrder == 'sortPosition') {
-                        orderedNodes = sortPosition(entry);
-                    }
-                    else if (sortOrder == 'sortAlphaAsc') {
-                        orderedNodes = sortAlpha(entry, 'asc');
-                    }
-                    else if (sortOrder == 'sortAlphaDesc') {
-                        orderedNodes = sortAlpha(entry, 'desc');
-                    }
-                    else if (sortOrder == 'sortReverse') {
-                        orderedNodes = sortReverse(entry);
-                    }
-                    else {
-                        orderedNodes = sortRandom(entry);
-                    }
-                    var newChildArr_1 = [];
-                    var indexToSpliceAt = childrenWithNoDuplicates.length - distanceFromTop;
-                    var topNodes = childrenWithNoDuplicates.splice(indexToSpliceAt);
-                    childrenWithNoDuplicates.forEach(function (node) {
-                        newChildArr_1.push(node);
-                    });
-                    orderedNodes.forEach(function (node) {
-                        newChildArr_1.push(node);
-                    });
-                    topNodes.forEach(function (node) {
-                        newChildArr_1.push(node);
-                    });
-                    newChildArr_1.forEach(function (child) {
-                        parent_1.appendChild(child);
-                    });
-                }
-            });
-        });
+        else {
+            sortSelectedFunction(sortOrder);
+        }
+    };
+}
+else {
+    figma.ui.hide();
+    if (figma.command == "sortPositionX") {
+        sortSelectedFunction("sortPositionX");
+        figma.closePlugin();
     }
-};
+    else if (figma.command == "sortPositionY") {
+        sortSelectedFunction("sortPositionY");
+        figma.closePlugin();
+    }
+    else if (figma.command == "sortPosition") {
+        sortSelectedFunction("sortPosition");
+        figma.closePlugin();
+    }
+    else if (figma.command == "sortAlphaAsc") {
+        sortSelectedFunction("sortAlphaAsc");
+        figma.closePlugin();
+    }
+    else if (figma.command == "sortAlphaDesc") {
+        sortSelectedFunction("sortAlphaDesc");
+        figma.closePlugin();
+    }
+    else if (figma.command == "sortReverse") {
+        sortSelectedFunction("sortReverse");
+        figma.closePlugin();
+    }
+    else if (figma.command == "sortRandom") {
+        sortSelectedFunction("sortRandom");
+        figma.closePlugin();
+    }
+}
