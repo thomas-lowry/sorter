@@ -8,10 +8,15 @@ Sorter by default will take your selection and sort them using the ordering of y
 
 If you only want to sort children of your selection, enable the "Sort Children Only" option. Sorter will remember your selection for the next time you run the plugin in that file.
 
+## Quick options in menu
+Added quick options in menu that can be executed without opening the interface that are available only for the selected layers (the children feature is not included on quick options)
+
 ## Sorting methods
 
 ### Position
 This will sort your selection using top, left → bottom, right ordering. In other words, your top left most element on the canvas will be at the top of the layer stack and your bottom right most element at the very bottom.
+
+Now it is possible to sort by only one of the axis (left → right or top → bottom).
 
 ### Alphabetical
 You can sort alphabetical based on layer names.

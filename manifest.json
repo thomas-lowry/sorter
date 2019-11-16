@@ -5,14 +5,14 @@
   "main": "code.js",
   "ui": "ui.html",
   "menu": [
-    {"name": "S Position (X Axis)", "command": "sortPositionX"},
-    {"name": "S Position (Y Axis)", "command": "sortPositionY"},
-    {"name": "S Position (T,L → B,R)", "command": "sortPosition"},
-    {"name": "S Alphabetical Asc. (A → Z)", "command": "sortAlphaAsc"},
-    {"name": "S Alphabetical Dsc. (Z → A)", "command": "sortAlphaDesc"},
-    {"name": "S Reverse", "command": "sortReverse"},
-    {"name": "S Random", "command": "sortRandom"},
+    {"name": "Position (L → R)", "command": "sortPositionX"},
+    {"name": "Position (T → B)", "command": "sortPositionY"},
+    {"name": "Position (T,L → B,R)", "command": "sortPosition"},
+    {"name": "Alphabetical Asc. (A → Z)", "command": "sortAlphaAsc"},
+    {"name": "Alphabetical Dsc. (Z → A)", "command": "sortAlphaDesc"},
+    {"name": "Reverse", "command": "sortReverse"},
+    {"name": "Random", "command": "sortRandom"},
     {"separator": true},
-    {"name": "S Advanced settings", "command": "sortUI"}
+    {"name": "Advanced settings", "command": "sortUI"}
   ]
 }
