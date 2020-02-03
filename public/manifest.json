@@ -1,0 +1,24 @@
+{
+  "name": "Sorter",
+  "id": "742038190980789811",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "index.html",
+  "menu": [
+    {"name": "Sorter", "command": "sorter"},
+    {"separator": true},
+    {"name": "Sort Position", "command": "position"},
+    {"name": "Sort Position (children)", "command": "positionChildren"},
+    {"separator": true},
+    {"name": "Sort Alpha Asc.", "command": "alphaAsc"},
+    {"name": "Sort Alpha Asc. (children)", "command": "alphaAscChildren"},
+    {"name": "Sort Alpha Dsc.", "command": "alphaDsc"},
+    {"name": "Sort Alpha Dsc. (children)", "command": "alphaDscChildren"},
+    {"separator": true},
+    {"name": "Sort Reverse", "command": "reverse"},
+    {"name": "Sort Reverse (Children)", "command": "reverseChildren"},
+    {"separator": true},
+    {"name": "Sort Random", "command": "random"},
+    {"name": "Sort Random (children)", "command": "randomChildren"}
+  ]
+}
