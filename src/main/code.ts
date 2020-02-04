@@ -11,7 +11,7 @@ if (figma.command === 'sorter') {
     var sortChildrenSetting = figma.root.getPluginData('sortChildrenOnly');
 
     //show UI
-    figma.showUI(__html__, {width: 240, height: 228 });
+    figma.showUI(__html__, {width: 200, height: 214 });
 
     //send a msg to the UI to remember state of sort children toggle
     if (sortChildrenSetting) {

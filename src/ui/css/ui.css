@@ -1,6 +1,6 @@
 /* UI elemnts */
 * {
-	-webkit-box-sizing: border-box                                        ;box-sizing: border-box;
+	-webkit-box-sizing: border-box                                                                                                                                                                                                                                                                                                                                                                ;box-sizing: border-box;
 }@font-face {
 	font-family: Inter;font-weight: 400;font-style: normal;src: url(https://rsms.me/inter/font-files/Inter-Regular.woff2?v=3.7) format('woff2'),url(https://rsms.me/inter/font-files/Inter-Regular.woff?v=3.7) format('woff');
 }@font-face {
@@ -20,7 +20,7 @@
 }.switch__toggle:checked + label:before {
 	background-color: #000000;
 }.switch__toggle:checked + label:after {
-	-webkit-transform: translateX(14px)                                        ;transform: translateX(14px);
+	-webkit-transform: translateX(14px)                                                                                                                                                                                                                                                                                                                                                                ;transform: translateX(14px);
 }.switch__toggle:disabled + label {
 	opacity: .3;
 }.switch__label {
@@ -43,7 +43,7 @@ html, body {
 	flex-direction: column;
 
 	width: 100%;
-	padding: 8px 0 8px 0;
+	padding: 4px 0;
 }
 
 .divider {
@@ -51,7 +51,7 @@ html, body {
 
 	width: 100%;
 	height: 1px;
-	margin: 8px 0 8px 0;
+	margin: 4px 0 4px 0;
 	padding: 0;
 
 	background-color: #e5e5e5;
@@ -98,7 +98,6 @@ html, body {
 .sort-button:hover .sort-button__label {
 	color: rgba(0,0,0,1.0);
 }
-
 
 .sort-button__icon {
 	width: 32px;
