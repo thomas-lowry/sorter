@@ -12,12 +12,10 @@
   "author": "Thomas Lowry",
   "license": "MIT",
   "devDependencies": {
-    "rollup": "^1.32.1"
-  },
-  "dependencies": {
     "@rollup/plugin-commonjs": "^11.0.2",
     "@rollup/plugin-node-resolve": "^7.1.1",
     "cssnano": "^4.1.10",
+    "rollup": "^1.32.1",
     "rollup-plugin-html-bundle": "0.0.3",
     "rollup-plugin-livereload": "^1.1.0",
     "rollup-plugin-postcss": "^2.5.0",
@@ -27,5 +25,6 @@
     "sirv-cli": "^0.4.5",
     "tslib": "^1.11.1",
     "typescript": "^3.8.3"
-  }
+  },
+  "dependencies": {}
 }
