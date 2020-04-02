@@ -11,7 +11,7 @@ if (figma.command === 'sorter') {
     var sortChildrenSetting = figma.root.getPluginData('sortChildrenOnly');
 
     //show UI
-    figma.showUI(__html__, {width: 200, height: 214 });
+    figma.showUI(__html__, {width: 200, height: 246 });
 
     //send a msg to the UI to remember state of sort children toggle
     if (sortChildrenSetting) {
@@ -23,10 +23,14 @@ if (figma.command === 'sorter') {
 } else {
 
     //menu commands
-    if (figma.command === 'position') {
-        sortLayers('sortPosition', false);
-    } else if (figma.command === 'positionChildren') {
-        sortLayers('sortPosition', true);
+    if (figma.command === 'positionHorzVert') {
+        sortLayers('sortPositionHorzVert', false);
+    } else if (figma.command === 'positionHorzVertChildren') {
+        sortLayers('sortPositionHorzVert', true);
+    } else if (figma.command === 'positionVertHorz') {
+        sortLayers('sortPositionVertHorz', false);
+    } else if (figma.command === 'positionVertHorzChildren') {
+        sortLayers('sortPositionVertHorz', true);
     } else if (figma.command === 'alphaAsc') {
         sortLayers('sortAlphaAsc', false);
     } else if (figma.command === 'alphaAscChildren') {
@@ -86,12 +90,19 @@ function sortLayers(order, children) {
                     splitNodes = helpers.splitFixed(childNodes);
                 }
 
-                if (order == 'sortPosition') {
+                if (order == 'sortPositionHorzVert') {
                     if (fixed) {
-                        fixedNodes = sort.position(splitNodes[0]);
-                        scrollingNodes = sort.position(splitNodes[1]);
+                        fixedNodes = sort.positionHorzVert(splitNodes[0]);
+                        scrollingNodes = sort.positionHorzVert(splitNodes[1]);
                     } else {
-                        orderedNodes = sort.position(childNodes);
+                        orderedNodes = sort.positionHorzVert(childNodes);
+                    }
+                } else if (order == 'sortPositionVertHorz') {
+                    if (fixed) {
+                        fixedNodes = sort.positionVertHorz(splitNodes[0]);
+                        scrollingNodes = sort.positionVertHorz(splitNodes[1]);
+                    } else {
+                        orderedNodes = sort.positionVertHorz(childNodes);
                     }
                 } else if (order == 'sortAlphaAsc') {
                     if (fixed) {
@@ -167,8 +178,10 @@ function sortLayers(order, children) {
 					let distanceFromTop = helpers.findDistanceFromTop(entry, children);
 					let childrenWithNoDuplicates = helpers.removeDuplicates(entry, children);
 	
-					if (order == 'sortPosition') {
-						orderedNodes = sort.position(entry);
+					if (order == 'sortPositionHorzVert') {
+                        orderedNodes = sort.positionHorzVert(entry);
+                    } else if (order == 'sortPositionVertHorz') {
+                        orderedNodes = sort.positionVertHorz(entry);
 					} else if (order == 'sortAlphaAsc') {
 						orderedNodes = sort.alphabetical(entry, 'asc');
 					} else if (order == 'sortAlphaDsc') {

@@ -17,13 +17,23 @@ function alphabetical(nodeData, direction) {
 
 
 // POSITION
-//sorts nodes based on x,y position
-function position(nodeData) {
+//sorts nodes left to right and then top to bottom
+function positionHorzVert(nodeData) {
 	nodeData.sort(function(node1, node2) {
 		if (node1.y < node2.y) return 1;
 		if (node1.y > node2.y) return -1;
 		if (node1.x < node2.x) return 1;
 		if (node1.x > node2.x) return -1;
+	});
+	return nodeData;
+}
+//sorts nodes top to bottom, then left to right
+function positionVertHorz(nodeData) {
+	nodeData.sort(function(node1, node2) {
+		if (node1.x < node2.x) return 1;
+		if (node1.x > node2.x) return -1;
+		if (node1.y < node2.y) return 1;
+		if (node1.y > node2.y) return -1;
 	});
 	return nodeData;
 }
@@ -54,4 +64,4 @@ function reverseChildren(nodeData) {
 	return nodeData;
 }
 
-export default { alphabetical, position, random, reverse, reverseChildren };
+export default { alphabetical, positionHorzVert, positionVertHorz, random, reverse, reverseChildren };
